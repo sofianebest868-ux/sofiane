@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>PixelForge Pro - Design Studio</title>
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#FF6B00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PixelForge">
+<meta name="description" content="PixelForge Pro - Professional design studio for creating social media posts, banners, and graphics. Works offline.">
+<link rel="manifest" id="manifest">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%230D0D0D' width='192' height='192' rx='40'/%3E%3Cpath fill='%23FF6B00' d='M96 40c-30.9 0-56 25.1-56 56s25.1 56 56 56 56-25.1 56-56-25.1-56-56-56zm0 95c-21.5 0-39-17.5-39-39s17.5-39 39-39 39 17.5 39 39-17.5 39-39 39z'/%3E%3Ctext x='96' y='110' font-family='Arial' font-size='48' font-weight='bold' fill='%23FF6B00' text-anchor='middle'%3EPF%3C/text%3E%3C/svg%3E">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Amiri:wght@400;700&family=Changa:wght@400;700&family=Almarai:wght@400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;700&family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Bebas+Neue&family=Lato:wght@400;700&family=Open+Sans:wght@400;700&family=Raleway:wght@400;700&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+    :root {
+        --primary: #FF6B00;
+        --primary-dark: #E55F00;
+        --primary-light: #FF8A33;
+        --bg-dark: #0D0D0D;
+        --bg-panel: #1A1A1A;
+        --bg-card: #252525;
+        --border: #333;
+        --text: #E5E5E5;
+        --text-muted: #A0A0A0;
+    }
+    
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    html, body {
+        font-family: 'Cairo', 'Poppins', sans-serif;
+        background: var(--bg-dark);
+        color: var(--text);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        touch-action: pan-y;
+    }
+    
+    .canvas-container {
+        box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,107,0,0.2);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(255,107,0,0.4);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255,107,0,0.5);
+    }
+    
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+    
+    .btn-tool {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        transition: all 0.2s ease;
+    }
+    
+    .btn-tool:hover {
+        background: var(--bg-panel);
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    
+    .btn-tool.active {
+        background: rgba(255,107,0,0.15);
+        border-color: var(--primary);
+        color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(255,107,0,0.2);
+    }
+    
+    input[type="range"] {
+        accent-color: var(--primary);
+    }
+    
+    input[type="color"] {
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    
+    select {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+    }
+    
+    select option {
+        background: var(--bg-card);
+        color: var(--text);
+        padding: 8px;
+    }
+    
+    .panel {
+        background: var(--bg-panel);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .glass {
+        background: rgba(13,13,13,0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .layer-item {
+        transition: all 0.2s ease;
+        cursor: move;
+    }
+    
+    .layer-item:hover {
+        background: var(--bg-card);
+    }
+    
+    .layer-item.active {
+        background: rgba(255,107,0,0.1);
+        border-right: 3px solid var(--primary);
+    }
+
+    .rtl-text {
+        direction: rtl;
+        text-align: right;
+    }
+
+    /* Splash Screen */
+    #splashScreen {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    #splashScreen.hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    .splash-logo {
+        width: 120px;
+        height: 120px;
+        animation: pulse-logo 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-logo {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,107,0,0.5)); }
+        50% { transform: scale(1.05); filter: drop-shadow(0 0 30px rgba(255,107,0,0.8)); }
+    }
+
+    /* Install Prompt */
+    #installPrompt {
+        position: fixed;
+        bottom: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 16px 24px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(255,107,0,0.4);
+        z-index: 1000;
+        transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: calc(100% - 32px);
+    }
+
+    #installPrompt.show {
+        bottom: 24px;
+    }
+
+    /* Offline Indicator */
+    #offlineIndicator {
+        position: fixed;
+        top: -60px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ef4444;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        z-index: 9998;
+        transition: top 0.3s ease;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    #offlineIndicator.show {
+        top: 80px;
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--bg-panel);
+        border: 1px solid var(--primary);
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        z-index: 9997;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+        .toolbar-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+        .main-layout {
+            flex-direction: column !important;
+        }
+        .sidebar {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .canvas-container {
+            border-radius: 12px;
+        }
+        #installPrompt {
+            border-radius: 12px 12px 0 0;
+            left: 0;
+            right: 0;
+            transform: none;
+            max-width: 100%;
+        }
+        #installPrompt.show {
+            bottom: 0;
+        }
+    }
+</style>
+</head>
+<body>
+<!-- Splash Screen -->
+<div id="splashScreen">
+    <svg class="splash-logo" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="192" height="192" rx="40" fill="#1A1A1A"/>
+        <path d="M96 48C69.4941 48 48 69.4941 48 96C48 122.506 69.4941 144 96 144C122.506 144 144 122.506 144 96C144 69.4941 122.506 48 96 48ZM96 128C78.3269 128 64 113.673 64 96C64 78.3269 78.3269 64 96 64C113.673 64 128 78.3269 128 96C128 113.673 113.673 128 96 128Z" fill="#FF6B00"/>
+        <text x="96" y="108" font-family="Arial" font-size="48" font-weight="bold" fill="#FF6B00" text-anchor="middle">PF</text>
+    </svg>
+    <h1 class="text-2xl font-bold mt-6 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] bg-clip-text text-transparent">PixelForge Pro</h1>
+    <p class="text-sm text-[var(--text-muted)] mt-2">جاري التحميل...</p>
+</div>
+
+<!-- Offline Indicator -->
+<div id="offlineIndicator">
+    <i class="fa-solid fa-wifi-slash"></i>
+    <span>أنت غير متصل - يعمل في وضع عدم الاتصال</span>
+</div>
+
+<!-- Install Prompt -->
+<div id="installPrompt">
+    <div class="flex items-center gap-3">
+        <i class="fa-solid fa-download text-2xl"></i>
+        <div class="flex-1">
+            <p class="font-bold text-sm">تثبيت التطبيق</p>
+            <p class="text-xs opacity-90">احصل على تجربة أفضل بدون إنترنت</p>
+        </div>
+        <button id="installBtn" class="bg-white text-[var(--primary)] px-4 py-2 rounded-lg text-sm font-bold">تثبيت</button>
+        <button id="dismissInstall" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+</div>
+
+<div id="app" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 border-b border-[var(--border)]">
+        <div class="max-w-[1800px] mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary-dark)] flex items-center justify-center shadow-lg shadow-[var(--primary)]/40">
+                    <i class="fa-solid fa-wand-magic-sparkles text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[var(--primary)] to-[var(--primary-light)] bg-clip-text text-transparent">PixelForge Pro</h1>
+                    <p class="text-xs text-[var(--text-muted)] hidden sm:block">استوديو التصميم الاحترافي</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+                <button id="rotateBtn" class="btn-primary px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">تدوير 15°</span>
+                </button>
+                <button id="resetRotateBtn" class="btn-tool px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                    <span class="hidden sm:inline">إعادة</span>
+                </button>
+                <button id="eraserBtn" class="btn-tool px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-eraser"></i>
+                    <span class="hidden sm:inline">ممحاة</span>
+                </button>
+                <button id="deleteBtn" class="btn-tool px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 text-red-400 hover:text-red-300 hover:border-red-400">
+                    <i class="fa-solid fa-trash"></i>
+                    <span class="hidden sm:inline">حذف</span>
+                </button>
+                <button id="downloadBtn" class="btn-primary px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="hidden sm:inline">تصدير PNG</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 max-w-[1800px] mx-auto w-full px-3 sm:px-6 py-4 sm:py-6 main-layout flex gap-4 sm:gap-6">
+        <!-- Left Sidebar - Tools -->
+        <aside class="sidebar w-full md:w-72 lg:w-80 space-y-4">
+            <!-- Add Elements -->
+            <div class="panel p-4 sm:p-5">
+                <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-[var(--primary)]">
+                    <i class="fa-solid fa-shapes"></i> إضافة عناصر
+                </h3>
+                <div class="grid grid-cols-2 gap-2 toolbar-grid">
+                    <button id="addTextBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-font text-lg"></i>
+                        <span class="text-xs">نص</span>
+                    </button>
+                    <button id="addRectBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-square text-lg"></i>
+                        <span class="text-xs">مستطيل</span>
+                    </button>
+                    <button id="addCircleBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-circle text-lg"></i>
+                        <span class="text-xs">دائرة</span>
+                    </button>
+                    <button id="addTriangleBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-play text-lg rotate-90"></i>
+                        <span class="text-xs">مثلث</span>
+                    </button>
+                    <button id="addLineBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-minus text-lg"></i>
+                        <span class="text-xs">خط</span>
+                    </button>
+                    <button id="uploadImgBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-image text-lg"></i>
+                        <span class="text-xs">رفع صورة</span>
+                    </button>
+                    <button id="unsplashBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-brands fa-unsplash text-lg"></i>
+                        <span class="text-xs">Unsplash</span>
+                    </button>
+                    <button id="removeBgBtn" class="btn-tool p-3 rounded-lg flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-scissors text-lg"></i>
+                        <span class="text-xs">إزالة خلفية</span>
+                    </button>
+                    <input type="file" id="imgUpload" accept="image/*" class="hidden">
+                </div>
+            </div>
+
+            <!-- Text Properties -->
+            <div id="textPanel" class="panel p-4 sm:p-5 hidden">
+                <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-[var(--primary)]">
+                    <i class="fa-solid fa-text-height"></i> خصائص النص
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs text-[var(--text-muted)] mb-2 block">المحتوى</label>
+                        <textarea id="textContent" rows="2" class="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:border-[var(--primary)] outline-none resize-none"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs text-[var(--text-muted)] mb-2 block">نوع الخط</label>
+                        <select id="fontSelect" class="w-full"></select>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-[var(--text-muted)] mb-2 block">الحجم</label>
+                            <input type="number" id="fontSize" min="8" max="200" value="40" class="w-full bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm focus:border-[var(--primary)] outline-none">
+                        </div>
+                        <div>
+                            <label class="text-xs text-[var(--text-muted)] mb-2 block">اللون</label>
+                            <input type="color" id="textColor" value="#FFFFFF" class="w-full h-[38px]">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-2">
+                        <button id="boldBtn" class="btn-tool py-2 rounded-lg text-sm font-bold">B</button>
+                        <button id="italicBtn" class="btn-tool py-2 rounded-lg text-sm italic">I</button>
+                        <button id="underlineBtn" class="btn-tool py-2 rounded-lg text-sm underline">U</button>
+                        <button id="rtlBtn" class="btn-tool py-2 rounded-lg text-xs">RTL</button>
+                    </div>
+                    
+                    <div>
+                        <label class="text-xs text-[var(--text-muted)] mb-2 block">المحاذاة</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button id="alignLeftBtn" class="btn-tool py-2 rounded-lg"><i class="fa-solid fa-align-left"></i></button>
+                            <button id="alignCenterBtn" class="btn-tool py-2 rounded-lg"><i class="fa-solid fa-align-center"></i></button>
+                            <button id="alignRightBtn" class="btn-tool py-2 rounded-lg"><i class="fa-solid fa-align-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transform -->
+            <div class="panel p-4 sm:p-5">
+                <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-[var(--primary)]">
+                    <i class="fa-solid fa-arrow-pointer"></i> التحويل
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-xs text-[var(--text-muted)]">الدوران</label>
+                            <span id="rotateValue" class="text-xs text-[var(--primary)] font-semibold">0°</span>
+                        </div>
+                        <input type="range" id="rotateSlider" min="0" max="360" value="0" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-xs text-[var(--text-muted)]">الشفافية</label>
+                            <span id="opacityValue" class="text-xs text-[var(--primary)] font-semibold">100%</span>
+                        </div>
+                        <input type="range" id="opacitySlider" min="0" max="100" value="100" class="w-full">
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <label class="text-xs text-[var(--text-muted)]">الحجم</label>
+                            <span id="scaleValue" class="text-xs text-[var(--primary)] font-semibold">100%</span>
+                        </div>
+                        <input type="range" id="scaleSlider" min="20" max="300" value="100" class="w-full">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shape Properties -->
+            <div id="shapePanel" class="panel p-4 sm:p-5 hidden">
+                <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-[var(--primary)]">
+                    <i class="fa-solid fa-palette"></i> لون الشكل
+                </h3>
+                <div>
+                    <label class="text-xs text-[var(--text-muted)] mb-2 block">اللون</label>
+                    <input type="color" id="shapeColor" value="#FF6B00" class="w-full h-[38px]">
+                </div>
+            </div>
+
+            <!-- Layers -->
+            <div class="panel p-4 sm:p-5">
+                <h3 class="text-sm font-bold mb-4 flex items-center gap-2 text-[var(--primary)]">
+                    <i class="fa-solid fa-layer-group"></i> الطبقات
+                </h3>
+                <div id="layersList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            </div>
+        </aside>
+
+        <!-- Canvas Area -->
+        <main class="flex-1 min-w-0">
+            <div class="panel p-3 sm:p-6">
+                <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-[var(--primary)] animate-pulse"></div>
+                        <span class="text-sm text-[var(--text-muted)]">Canvas: 1200 × 800px</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>انقر للتحديد • اسحب للتحريك • نقر مزدوج للتعديل</span>
+                    </div>
+                </div>
+                <div class="w-full flex justify-center overflow-auto">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-4 panel p-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button id="bringFrontBtn" class="btn-tool py-2 px-3 rounded-lg text-xs flex items-center gap-2 justify-center">
+                        <i class="fa-solid fa-arrow-up"></i> للأمام
+                    </button>
+                    <button id="sendBackBtn" class="btn-tool py-2 px-3 rounded-lg text-xs flex items-center gap-2 justify-center">
+                        <i class="fa-solid fa-arrow-down"></i> للخلف
+                    </button>
+                    <button id="duplicateBtn" class="btn-tool py-2 px-3 rounded-lg text-xs flex items-center gap-2 justify-center">
+                        <i class="fa-solid fa-copy"></i> نسخ
+                    </button>
+                    <button id="clearCanvasBtn" class="btn-tool py-2 px-3 rounded-lg text-xs flex items-center gap-2 justify-center text-red-400">
+                        <i class="fa-solid fa-broom"></i> مسح الكل
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Unsplash Modal -->
+<div id="unsplashModal" class="hidden fixed inset-0 bg-black/80 z-[9998] flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-panel)] rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="p-6 border-b border-[var(--border)]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-brands fa-unsplash text-[var(--primary)]"></i>
+                    Unsplash Stock Photos
+                </h3>
+                <button id="closeUnsplashModal" class="text-[var(--text-muted)] hover:text-white">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="unsplashSearch" placeholder="ابحث عن صور..." class="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-4 py-2 text-sm focus:border-[var(--primary)] outline-none">
+                <button id="unsplashSearchBtn" class="btn-primary px-6 rounded-lg"><i class="fa-solid fa-search"></i></button>
+            </div>
+        </div>
+        <div id="unsplashGrid" class="flex-1 overflow-y-auto p-6 grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+    </div>
+</div>
+
+<script>
+    // PWA Setup
+    const manifestData = {
+        name: "PixelForge Pro",
+        short_name: "PixelForge",
+        description: "Professional design studio for creating social media posts, banners, and graphics",
+        start_url: "/",
+        display: "standalone",
+        theme_color: "#FF6B00",
+        background_color: "#0D0D0D",
+        icons: [
+            {
+                src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect fill='%230D0D0D' width='192' height='192' rx='40'/%3E%3Cpath fill='%23FF6B00' d='M96 48C69.4941 48 48 69.4941 48 96C48 122.506 69.4941 144 96 144C122.506 144 144 122.506 144 96C144 69.4941 122.506 48 96 48ZM96 128C78.3269 128 64 113.673 64 96C64 78.3269 78.3269 64 96 64C113.673 64 128 78.3269 128 96C128 113.673 128 96 128Z'/%3E%3Ctext x='96' y='108' font-family='Arial' font-size='48' font-weight='bold' fill='%23FF6B00' text-anchor='middle'%3EPF%3C/text%3E%3C/svg%3E",
+                sizes: "192x192",
+                type: "image/svg+xml"
+            },
+            {
+                src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%230D0D0D' width='512' height='512' rx='100'/%3E%3Cpath fill='%23FF6B00' d='M256 128C185.311 128 128 185.311 128 256C128 326.689 185.311 384 256 384C326.689 384 384 326.689 384 256C384 185.311 326.689 128 256 128ZM256 341.333C208.89 341.333 170.667 303.11 170.667 256C170.667 208.89 208.89 170.667 256 170.667C303.11 170.667 341.333 208.89 341.333 256C341.333 303.11 303.11 341.333 256 341.333Z'/%3E%3Ctext x='256' y='288' font-family='Arial' font-size='128' font-weight='bold' fill='%23FF6B00' text-anchor='middle'%3EPF%3C/text%3E%3C/svg%3E",
+                sizes: "512x512",
+                type: "image/svg+xml"
+            }
+        ]
+    };
+
+    const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    document.getElementById('manifest').href = manifestURL;
+
+    // Service Worker
+    const swCode = `
+        const CACHE_NAME = 'pixelforge-v1';
+        const urlsToCache = [
+            '/',
+            'https://cdn.tailwindcss.com',
+            'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+            'https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Amiri:wght@400;700&family=Changa:wght@400;700&family=Almarai:wght@400;700&family=Montserrat:wght@400;700&family=Poppins:wght@400;700&family=Roboto:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Bebas+Neue&family=Lato:wght@400;700&family=Open+Sans:wght@400;700&family=Raleway:wght@400;700&family=Ubuntu:wght@400;700&display=swap'
+        ];
+
+        self.addEventListener('install', event => {
+            event.waitUntil(
+                caches.open(CACHE_NAME)
+                    .then(cache => cache.addAll(urlsToCache))
+                    .then(() => self.skipWaiting())
+            );
+        });
+
+        self.addEventListener('activate', event => {
+            event.waitUntil(
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            if (cacheName !== CACHE_NAME) {
+                                return caches.delete(cacheName);
+                            }
+                        })
+                    );
+                }).then(() => self.clients.claim())
+            );
+        });
+
+        self.addEventListener('fetch', event => {
+            event.respondWith(
+                caches.match(event.request)
+                    .then(response => {
+                        if (response) return response;
+                        return fetch(event.request).then(response => {
+                            if (!response || response.status !== 200 || response.type !== 'basic') {
+                                return response;
+                            }
+                            const responseToCache = response.clone();
+                            caches.open(CACHE_NAME).then(cache => {
+                                cache.put(event.request, responseToCache);
+                            });
+                            return response;
+                        });
+                    })
+                    .catch(() => {
+                        return new Response('Offline - المحتوى غير متاح', {
+                            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                        });
+                    })
+            );
+        });
+    `;
+
+    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+    const swURL = URL.createObjectURL(swBlob);
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register(swURL).then(() => {
+            console.log('Service Worker registered');
+        }).catch(err => console.log('SW registration failed:', err));
+    }
+
+    // Install Prompt
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installBtn = document.getElementById('installBtn');
+    const dismissInstall = document.getElementById('dismissInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        setTimeout(() => installPrompt.classList.add('show'), 3000);
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                showToast('تم التثبيت بنجاح!', 'success');
+            }
+            deferredPrompt = null;
+            installPrompt.classList.remove('show');
+        }
+    });
+
+    dismissInstall.addEventListener('click', () => {
+        installPrompt.classList.remove('show');
+        localStorage.setItem('installDismissed', 'true');
+    });
+
+    // Offline Detection
+    const offlineIndicator = document.getElementById('offlineIndicator');
+    window.addEventListener('online', () => {
+        offlineIndicator.classList.remove('show');
+        showToast('عاد الاتصال بالإنترنت', 'success');
+    });
+    window.addEventListener('offline', () => {
+        offlineIndicator.classList.add('show');
+    });
+
+    // Splash Screen
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.getElementById('splashScreen').classList.add('hidden');
+        }, 1500);
+    });
+
+    // Toast
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <div class="flex items-center gap-3">
+                <i class="fa-solid ${type === 'success' ? 'fa-check-circle text-green-500' : 'fa-info-circle text-[var(--primary)]'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Initialize Fabric Canvas
+    const canvas = new fabric.Canvas('canvas', {
+        width: 1200,
+        height: 800,
+        backgroundColor: '#1a1a1a',
+        preserveObjectStacking: true
+    });
+
+    // Font list
+    const fonts = [
+        { name: 'Cairo', family: 'Cairo', isArabic: true },
+        { name: 'Tajawal', family: 'Tajawal', isArabic: true },
+        { name: 'Amiri', family: 'Amiri', isArabic: true },
+        { name: 'Changa', family: 'Changa', isArabic: true },
+        { name: 'Almarai', family: 'Almarai', isArabic: true },
+        { name: 'Poppins', family: 'Poppins', isArabic: false },
+        { name: 'Montserrat', family: 'Montserrat', isArabic: false },
+        { name: 'Roboto', family: 'Roboto', isArabic: false },
+        { name: 'Open Sans', family: 'Open Sans', isArabic: false },
+        { name: 'Lato', family: 'Lato', isArabic: false },
+        { name: 'Raleway', family: 'Raleway', isArabic: false },
+        { name: 'Ubuntu', family: 'Ubuntu', isArabic: false },
+        { name: 'Oswald', family: 'Oswald', isArabic: false },
+        { name: 'Playfair Display', family: 'Playfair Display', isArabic: false },
+        { name: 'Bebas Neue', family: 'Bebas Neue', isArabic: false },
+        { name: 'Arial', family: 'Arial', isArabic: false },
+        { name: 'Times New Roman', family: 'Times New Roman', isArabic: false },
+        { name: 'Georgia', family: 'Georgia', isArabic: false },
+        { name: 'Courier New', family: 'Courier New', isArabic: false },
+        { name: 'Verdana', family: 'Verdana', isArabic: false }
+    ];
+
+    const fontSelect = document.getElementById('fontSelect');
+    fonts.forEach(font => {
+        const option = document.createElement('option');
+        option.value = font.family;
+        option.textContent = font.name;
+        option.style.fontFamily = font.family;
+        fontSelect.appendChild(option);
+    });
+
+    let activeObject = null;
+    let isEraserMode = false;
+
+    function isArabic(text) {
+        const arabicRegex = /[\u0600-\u06FF\u0750-\u077F]/;
+        return arabicRegex.test(text);
+    }
+
+    // Canvas events
+    canvas.on('selection:created', (e) => {
+        activeObject = e.selected[0];
+        updatePanels();
+        updateLayers();
+    });
+
+    canvas.on('selection:updated', (e) => {
+        activeObject = e.selected[0];
+        updatePanels();
+        updateLayers();
+    });
+
+    canvas.on('selection:cleared', () => {
+        activeObject = null;
+        hideAllPanels();
+        updateLayers();
+    });
+
+    canvas.on('object:added', updateLayers);
+    canvas.on('object:removed', updateLayers);
+    canvas.on('object:modified', () => {
+        if (activeObject) updateSliders();
+    });
+
+    function hideAllPanels() {
+        document.getElementById('textPanel').classList.add('hidden');
+        document.getElementById('shapePanel').classList.add('hidden');
+    }
+
+    function updatePanels() {
+        if (!activeObject) return;
+        
+        hideAllPanels();
+        
+        if (activeObject.type === 'i-text' || activeObject.type === 'text' || activeObject.type === 'textbox') {
+            document.getElementById('textPanel').classList.remove('hidden');
+            document.getElementById('textContent').value = activeObject.text;
+            document.getElementById('fontSelect').value = activeObject.fontFamily || 'Cairo';
+            document.getElementById('fontSize').value = Math.round(activeObject.fontSize || 40);
+            document.getElementById('textColor').value = activeObject.fill || '#FFFFFF';
+            
+            document.getElementById('boldBtn').classList.toggle('active', activeObject.fontWeight === 'bold');
+            document.getElementById('italicBtn').classList.toggle('active', activeObject.fontStyle === 'italic');
+            document.getElementById('underlineBtn').classList.toggle('active', activeObject.underline);
+            document.getElementById('rtlBtn').classList.toggle('active', activeObject.direction === 'rtl');
+        } else if (activeObject.type === 'rect' || activeObject.type === 'circle' || activeObject.type === 'triangle') {
+            document.getElementById('shapePanel').classList.remove('hidden');
+            document.getElementById('shapeColor').value = activeObject.fill || '#FF6B00';
+        }
+        
+        updateSliders();
+    }
+
+    function updateSliders() {
+        if (!activeObject) return;
+        
+        const angle = Math.round(activeObject.angle || 0);
+        const normalisedAngle = angle < 0 ? angle + 360 : angle;
+        document.getElementById('rotateSlider').value = normalisedAngle;
+        document.getElementById('rotateValue').textContent = normalisedAngle + '°';
+        
+        document.getElementById('opacitySlider').value = (activeObject.opacity || 1) * 100;
+        document.getElementById('opacityValue').textContent = Math.round((activeObject.opacity || 1) * 100) + '%';
+        
+        const scale = Math.round((activeObject.scaleX || 1) * 100);
+        document.getElementById('scaleSlider').value = scale;
+        document.getElementById('scaleValue').textContent = scale + '%';
+    }
+
+    // Layers System
+    function updateLayers() {
+        const layersList = document.getElementById('layersList');
+        layersList.innerHTML = '';
+        
+        const objects = canvas.getObjects().slice().reverse();
+        objects.forEach((obj, idx) => {
+            const layerItem = document.createElement('div');
+            layerItem.className = `layer-item p-3 rounded-lg flex items-center gap-3 ${obj === activeObject ? 'active' : ''}`;
+            
+            let icon = 'fa-square';
+            let name = 'عنصر';
+            if (obj.type === 'i-text' || obj.type === 'textbox') {
+                icon = 'fa-font';
+                name = obj.text.substring(0, 15) + '...';
+            } else if (obj.type === 'rect') {
+                icon = 'fa-square';
+                name = 'مستطيل';
+            } else if (obj.type === 'circle') {
+                icon = 'fa-circle';
+                name = 'دائرة';
+            } else if (obj.type === 'triangle') {
+                icon = 'fa-play';
+                name = 'مثلث';
+            } else if (obj.type === 'line') {
+                icon = 'fa-minus';
+                name = 'خط';
+            } else if (obj.type === 'image') {
+                icon = 'fa-image';
+                name = 'صورة';
+            }
+            
+            layerItem.innerHTML = `
+                <i class="fa-solid ${icon} text-xs"></i>
+                <span class="flex-1 text-sm truncate">${name}</span>
+                <button class="layer-visibility text-xs ${obj.visible !== false ? 'text-[var(--text-muted)]' : 'text-red-400'}" data-idx="${objects.length - 1 - idx}">
+                    <i class="fa-solid ${obj.visible !== false ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                </button>
+            `;
+            
+            layerItem.addEventListener('click', () => {
+                canvas.setActiveObject(canvas.item(canvas.getObjects().length - 1 - idx));
+                canvas.renderAll();
+            });
+            
+            const visBtn = layerItem.querySelector('.layer-visibility');
+            visBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const objIdx = parseInt(visBtn.dataset.idx);
+                canvas.item(objIdx).visible = !canvas.item(objIdx).visible;
+                canvas.renderAll();
+                updateLayers();
+            });
+            
+            layersList.appendChild(layerItem);
+        });
+    }
+
+    // Add Elements
+    document.getElementById('addTextBtn').addEventListener('click', () => {
+        const text = new fabric.IText('نص مزدوج للتعديل', {
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            fontFamily: 'Cairo',
+            fontSize: 40,
+            fill: '#FFFFFF',
+            originX: 'center',
+            originY: 'center',
+            direction: 'rtl'
+        });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        canvas.renderAll();
+    });
+
+    document.getElementById('addRectBtn').addEventListener('click', () => {
+        const rect = new fabric.Rect({
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            width: 200,
+            height: 150,
+            fill: '#FF6B00',
+            originX: 'center',
+            originY: 'center',
+            rx: 12,
+            ry: 12
+        });
+        canvas.add(rect);
+        canvas.setActiveObject(rect);
+        canvas.renderAll();
+    });
+
+    document.getElementById('addCircleBtn').addEventListener('click', () => {
+        const circle = new fabric.Circle({
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            radius: 75,
+            fill: '#FF6B00',
+            originX: 'center',
+            originY: 'center'
+        });
+        canvas.add(circle);
+        canvas.setActiveObject(circle);
+        canvas.renderAll();
+    });
+
+    document.getElementById('addTriangleBtn').addEventListener('click', () => {
+        const triangle = new fabric.Triangle({
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            width: 150,
+            height: 150,
+            fill: '#FF6B00',
+            originX: 'center',
+            originY: 'center'
+        });
+        canvas.add(triangle);
+        canvas.setActiveObject(triangle);
+        canvas.renderAll();
+    });
+
+    document.getElementById('addLineBtn').addEventListener('click', () => {
+        const line = new fabric.Line([50, 100, 250, 100], {
+            left: canvas.width / 2,
+            top: canvas.height / 2,
+            stroke: '#FF6B00',
+            strokeWidth: 4,
+            originX: 'center',
+            originY: 'center'
+        });
+        canvas.add(line);
+        canvas.setActiveObject(line);
+        canvas.renderAll();
+    });
+
+    document.getElementById('uploadImgBtn').addEventListener('click', () => {
+        document.getElementById('imgUpload').click();
+    });
+
+    document.getElementById('imgUpload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            fabric.Image.fromURL(event.target.result, (img) => {
+                img.scaleToWidth(300);
+                img.set({
+                    left: canvas.width / 2,
+                    top: canvas.height / 2,
+                    originX: 'center',
+                    originY: 'center'
+                });
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.renderAll();
+                showToast('تم إضافة الصورة بنجاح', 'success');
+            });
+        };
+        reader.readAsDataURL(file);
+        e.target.value = '';
+    });
+
+    // Unsplash Integration
+    document.getElementById('unsplashBtn').addEventListener('click', () => {
+        document.getElementById('unsplashModal').classList.remove('hidden');
+        loadUnsplashImages('design');
+    });
+
+    document.getElementById('closeUnsplashModal').addEventListener('click', () => {
+        document.getElementById('unsplashModal').classList.add('hidden');
+    });
+
+    document.getElementById('unsplashSearchBtn').addEventListener('click', () => {
+        const query = document.getElementById('unsplashSearch').value;
+        if (query) loadUnsplashImages(query);
+    });
+
+    function loadUnsplashImages(query) {
+        const grid = document.getElementById('unsplashGrid');
+        grid.innerHTML = '<div class="col-span-full text-center py-8"><i class="fa-solid fa-spinner fa-spin text-4xl text-[var(--primary)]"></i></div>';
+        
+        fetch(`https://source.unsplash.com/400x400/?${query}`)
+            .then(response => {
+                grid.innerHTML = '';
+                for (let i = 0; i < 12; i++) {
+                    const img = document.createElement('img');
+                    img.src = `https://source.unsplash.com/400x400/?${query}&sig=${i}`;
+                    img.className = 'rounded-lg cursor-pointer hover:scale-105 transition-transform w-full h-40 object-cover';
+                    img.addEventListener('click', () => {
+                        fabric.Image.fromURL(img.src, (fabricImg) => {
+                            fabricImg.scaleToWidth(400);
+                            fabricImg.set({
+                                left: canvas.width / 2,
+                                top: canvas.height / 2,
+                                originX: 'center',
+                                originY: 'center'
+                            });
+                            canvas.add(fabricImg);
+                            canvas.setActiveObject(fabricImg);
+                            canvas.renderAll();
+                            document.getElementById('unsplashModal').classList.add('hidden');
+                            showToast('تم إضافة الصورة', 'success');
+                        }, {crossOrigin: 'anonymous'});
+                    });
+                    grid.appendChild(img);
+                }
+            });
+    }
+
+    // Remove Background - Works offline using canvas
+    document.getElementById('removeBgBtn').addEventListener('click', () => {
+        if (!activeObject || activeObject.type !== 'image') {
+            showToast('حدد صورة أولاً', 'info');
+            return;
+        }
+        
+        const img = activeObject;
+        const tempCanvas = document.createElement('canvas');
+        const ctx = tempCanvas.getContext('2d', {willReadFrequently: true});
+        tempCanvas.width = img.width * img.scaleX;
+        tempCanvas.height = img.height * img.scaleY;
+        
+        img.clone((cloned) => {
+            cloned.set({scaleX: 1, scaleY: 1, left: 0, top: 0});
+            const tempCanvasOriginal = document.createElement('canvas');
+            tempCanvasOriginal.width = cloned.width;
+            tempCanvasOriginal.height = cloned.height;
+            cloned.setCoords();
+            
+            const imgElement = cloned.getElement();
+            ctx.drawImage(imgElement, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            // Simple background removal - remove white/light pixels
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                if (r > 240 && g > 240 && b > 240) {
+                    data[i + 3] = 0;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            fabric.Image.fromURL(tempCanvas.toDataURL(), (newImg) => {
+                newImg.set({
+                    left: img.left,
+                    top: img.top,
+                    angle: img.angle,
+                    scaleX: img.scaleX,
+                    scaleY: img.scaleY,
+                    originX: img.originX,
+                    originY: img.originY
+                });
+                canvas.remove(img);
+                canvas.add(newImg);
+                canvas.setActiveObject(newImg);
+                canvas.renderAll();
+                showToast('تم إزالة الخلفية', 'success');
+            });
+        });
+    });
+
+    // Eraser Mode
+    document.getElementById('eraserBtn').addEventListener('click', () => {
+        isEraserMode = !isEraserMode;
+        document.getElementById('eraserBtn').classList.toggle('active');
+        canvas.isDrawingMode = isEraserMode;
+        if (isEraserMode) {
+            canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+            canvas.freeDrawingBrush.color = '#1a1a1a';
+            canvas.freeDrawingBrush.width = 20;
+            showToast('وضع الممحاة مفعل - ارسم للمسح', 'info');
+        }
+    });
+
+    // Text Controls
+    document.getElementById('textContent').addEventListener('input', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            const text = e.target.value;
+            activeObject.set('text', text);
+            if (isArabic(text)) {
+                activeObject.set('direction', 'rtl');
+                document.getElementById('rtlBtn').classList.add('active');
+            }
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('fontSelect').addEventListener('change', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            const selectedFont = fonts.find(f => f.family === e.target.value);
+            activeObject.set('fontFamily', e.target.value);
+            if (selectedFont && selectedFont.isArabic) {
+                activeObject.set('direction', 'rtl');
+                document.getElementById('rtlBtn').classList.add('active');
+            }
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('fontSize').addEventListener('input', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            activeObject.set('fontSize', parseInt(e.target.value));
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('textColor').addEventListener('input', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            activeObject.set('fill', e.target.value);
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('boldBtn').addEventListener('click', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            const isBold = activeObject.fontWeight === 'bold';
+            activeObject.set('fontWeight', isBold ? 'normal' : 'bold');
+            e.target.classList.toggle('active');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('italicBtn').addEventListener('click', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            const isItalic = activeObject.fontStyle === 'italic';
+            activeObject.set('fontStyle', isItalic ? 'normal' : 'italic');
+            e.target.classList.toggle('active');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('underlineBtn').addEventListener('click', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            activeObject.set('underline', !activeObject.underline);
+            e.target.classList.toggle('active');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('rtlBtn').addEventListener('click', (e) => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            const isRtl = activeObject.direction === 'rtl';
+            activeObject.set('direction', isRtl ? 'ltr' : 'rtl');
+            e.target.classList.toggle('active');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('alignLeftBtn').addEventListener('click', () => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            activeObject.set('textAlign', 'left');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('alignCenterBtn').addEventListener('click', () => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            activeObject.set('textAlign', 'center');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('alignRightBtn').addEventListener('click', () => {
+        if (activeObject && (activeObject.type === 'i-text' || activeObject.type === 'textbox')) {
+            activeObject.set('textAlign', 'right');
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('shapeColor').addEventListener('input', (e) => {
+        if (activeObject && (activeObject.type === 'rect' || activeObject.type === 'circle' || activeObject.type === 'triangle')) {
+            activeObject.set('fill', e.target.value);
+            canvas.renderAll();
+        }
+    });
+
+    // Transform Controls
+    document.getElementById('rotateSlider').addEventListener('input', (e) => {
+        if (activeObject) {
+            const angle = parseInt(e.target.value);
+            activeObject.rotate(angle);
+            document.getElementById('rotateValue').textContent = angle + '°';
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('opacitySlider').addEventListener('input', (e) => {
+        if (activeObject) {
+            const opacity = parseInt(e.target.value) / 100;
+            activeObject.set('opacity', opacity);
+            document.getElementById('opacityValue').textContent = e.target.value + '%';
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('scaleSlider').addEventListener('input', (e) => {
+        if (activeObject) {
+            const scale = parseInt(e.target.value) / 100;
+            activeObject.set({ scaleX: scale, scaleY: scale });
+            document.getElementById('scaleValue').textContent = e.target.value + '%';
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('rotateBtn').addEventListener('click', () => {
+        if (activeObject) {
+            const currentAngle = activeObject.angle || 0;
+            const newAngle = (currentAngle + 15) % 360;
+            activeObject.rotate(newAngle);
+            updateSliders();
+            canvas.renderAll();
+        }
+    });
+
+    document.getElementById('resetRotateBtn').addEventListener('click', () => {
+        if (activeObject) {
+            activeObject.rotate(0);
+            updateSliders();
+            canvas.renderAll();
+        }
+    });
+
+    // Quick Actions
+    document.getElementById('bringFrontBtn').addEventListener('click', () => {
+        if (activeObject) {
+            canvas.bringToFront(activeObject);
+            canvas.renderAll();
+            updateLayers();
+        }
+    });
+
+    document.getElementById('sendBackBtn').addEventListener('click', () => {
+        if (activeObject) {
+            canvas.sendToBack(activeObject);
+            canvas.renderAll();
+            updateLayers();
+        }
+    });
+
+    document.getElementById('duplicateBtn').addEventListener('click', () => {
+        if (activeObject) {
+            activeObject.clone((cloned) => {
+                cloned.set({
+                    left: cloned.left + 20,
+                    top: cloned.top + 20
+                });
+                canvas.add(cloned);
+                canvas.setActiveObject(cloned);
+                canvas.renderAll();
+                showToast('تم النسخ', 'success');
+            });
+        }
+    });
+
+    document.getElementById('deleteBtn').addEventListener('click', () => {
+        if (activeObject) {
+            canvas.remove(activeObject);
+            canvas.discardActiveObject();
+            canvas.renderAll();
+            showToast('تم الحذف', 'info');
+        }
+    });
+
+    document.getElementById('clearCanvasBtn').addEventListener('click', () => {
+        if (confirm('مسح جميع العناصر من اللوحة؟')) {
+            canvas.clear();
+            canvas.backgroundColor = '#1a1a1a';
+            canvas.renderAll();
+            showToast('تم مسح اللوحة', 'info');
+        }
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            quality: 1
+        });
+        const link = document.createElement('a');
+        link.download = 'pixelforge-design-' + Date.now() + '.png';
+        link.href = dataURL;
+        link.click();
+        showToast('جاري التصدير...', 'success');
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            document.getElementById('deleteBtn').click();
+        }
+        if (e.key === 'd' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            document.getElementById('duplicateBtn').click();
+        }
+    });
+
+    // Initialize
+    setTimeout(() => {
+        const welcomeText = new fabric.IText('مرحباً بك في PixelForge Pro', {
+            left: canvas.width / 2,
+            top: canvas.height / 2 - 50,
+            fontFamily: 'Cairo',
+            fontSize: 48,
+            fontWeight: 'bold',
+            fill: '#FF6B00',
+            originX: 'center',
+            originY: 'center',
+            direction: 'rtl'
+        });
+        canvas.add(welcomeText);
+        
+        const subText = new fabric.IText('انقر على إضافة عناصر لبدء التصميم', {
+            left: canvas.width / 2,
+            top: canvas.height / 2 + 20,
+            fontFamily: 'Cairo',
+            fontSize: 20,
+            fill: '#A0A0A0',
+            originX: 'center',
+            originY: 'center',
+            direction: 'rtl'
+        });
+        canvas.add(subText);
+        canvas.renderAll();
+        updateLayers();
+    }, 1600);
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
